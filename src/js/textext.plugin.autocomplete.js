@@ -623,7 +623,7 @@
 		self.scrollSuggestionIntoView(target);
 	};
 
-	/**
+	/** 
 	 * Returns the first suggestion HTML element from the dropdown that is highlighted as selected.
 	 *
 	 * @signature TextExtAutocomplete.selectedSuggestionElement()
@@ -870,10 +870,12 @@
 
 		self.clearItems();
 
-		$.each(suggestions || [], function(index, item)
-		{
-			self.addSuggestion(item);
-		});
+		// $.each(suggestions || [], function(index, item)
+		// {
+		// 	self.addSuggestion(item);
+		// });
+
+		self.addSuggestions(suggestions);
 	};
 
 	/**
@@ -930,6 +932,44 @@
 
 		node.data(CSS_SUGGESTION, suggestion);
 	};
+
+	/**
+	 * Adds multiple suggestions to the dropdown. Uses `ItemManager.itemToString()` to
+	 * serialize provided suggestion to string.
+	 *
+	 * @signature TextExtAutocomplete.addSuggestions(suggestions)
+	 *
+	 * @param suggestion {Array} Suggestion items.
+	 *
+	 * @author jsgao0
+	 * @date 2018/08/15
+	 * @id TextExtAutocomplete.addSuggestions
+	 */
+	p.addSuggestions = function (suggestions)
+	{
+		var self     = this,
+			renderer = self.opts(OPT_RENDER),
+			container = self.containerElement().find('.text-list'),
+			documentFragment = document.createDocumentFragment()
+			;
+		
+		suggestions.forEach(function (suggestion) {
+			var node = self.generateDropdownItem(renderer ? renderer.call(self, suggestion) : self.itemManager().itemToString(suggestion));
+			documentFragment.appendChild(node[0]);
+			node.data(CSS_SUGGESTION, suggestion);
+		});
+		container[0].appendChild(documentFragment);
+	};
+
+	p.generateDropdownItem = function(html)
+	{
+		var self      = this,
+			node      = $(self.opts(OPT_HTML_SUGGESTION))
+			;
+
+		node.find('.text-label').html(html);
+		return node;
+	}
 
 	/**
 	 * Adds and returns HTML node to the bottom of the dropdown.
@@ -1105,6 +1145,7 @@
 	 */
 	p.withinWrapElement = function(element) 
 	{
-		return this.core().wrapElement().find(element).size() > 0;
+		var result = this.core().wrapElement().find(element);
+		return result.length > 0;
 	}
 })(jQuery);
